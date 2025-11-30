@@ -18,7 +18,13 @@ export const GameConfig = {
         near: 0.1,
         far: 1000,
         mouseSensitivity: 0.001,
-        verticalAngleLimit: Math.PI / 2.2
+        verticalAngleLimit: Math.PI / 2.2,
+        // 第三视角配置
+        thirdPerson: {
+            distance: 5,        // 相机距离角色的距离
+            height: 1.2,        // 相机高度偏移（降低高度）
+            smoothness: 0.1     // 相机跟随平滑度（0-1，越小越平滑）
+        }
     },
 
     // 背包配置
@@ -51,4 +57,5 @@ export const GameConfig = {
         environments: 'assets/models/environments/'
     }
 };
+
 

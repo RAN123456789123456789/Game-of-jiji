@@ -9,6 +9,7 @@ export class GameUI {
         this.treasureHint = null;
         this.attackFeedback = null;
         this.victoryModal = null;
+        this.failureModal = null;
     }
 
     /**
@@ -32,7 +33,21 @@ export class GameUI {
                 <div class="scene-container">
                     <div id="scene3d"></div>
                     <div class="controls-hint">
-                        <p>点击场景开始游戏 | WASD移动 | 鼠标控制视角 | 空格跳跃 | 左键攻击 | B打开背包 | ESC退出</p>
+                        <p>点击场景开始游戏 | WASD移动 | 鼠标控制视角 | 空格跳跃 | 左键攻击 | B切换背包 | ESC退出</p>
+                    </div>
+                    <button class="inventory-toggle-btn" id="inventory-toggle-btn" title="打开背包 (B)">
+                        <span class="inventory-btn-icon">🎒</span>
+                        <span class="inventory-btn-text">背包</span>
+                    </button>
+                    <div class="skills-bar" id="skills-bar">
+                        <div class="skill-item" id="skill-clone" title="分身技能 (1)">
+                            <div class="skill-icon">👥</div>
+                            <div class="skill-cooldown" id="skill-clone-cooldown">0</div>
+                        </div>
+                        <div class="skill-item" id="skill-dragon-tiger" title="龙虎拳 (2)">
+                            <div class="skill-icon">👊</div>
+                            <div class="skill-cooldown" id="skill-dragon-tiger-cooldown">0</div>
+                        </div>
                     </div>
                 </div>
                 <div class="character-info">
@@ -191,6 +206,59 @@ export class GameUI {
     }
 
     /**
+     * 显示失败界面
+     * @param {Function} onRestart 重新开始回调
+     * @param {Function} onBackToMain 返回主菜单回调
+     */
+    showFailure(onRestart, onBackToMain) {
+        // 如果已经显示，不重复显示
+        if (this.failureModal) return;
+
+        this.failureModal = document.createElement('div');
+        this.failureModal.className = 'failure-modal';
+        this.failureModal.innerHTML = `
+            <div class="failure-content">
+                <h1>💀 任务失败</h1>
+                <p class="failure-message">你的血量归零了！</p>
+                <div class="failure-buttons">
+                    <button class="failure-button" id="restart-btn">重新开始</button>
+                    <button class="failure-button" id="back-to-main-btn">返回首页</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(this.failureModal);
+
+        // 绑定按钮事件
+        const restartBtn = this.failureModal.querySelector('#restart-btn');
+        const backBtn = this.failureModal.querySelector('#back-to-main-btn');
+
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                this.closeFailure();
+                if (onRestart) {
+                    onRestart();
+                }
+            });
+        }
+
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.closeFailure();
+                if (onBackToMain) {
+                    onBackToMain();
+                }
+            });
+        }
+    }
+
+    closeFailure() {
+        if (this.failureModal) {
+            this.failureModal.remove();
+            this.failureModal = null;
+        }
+    }
+
+    /**
      * 清理UI
      */
     dispose() {
@@ -206,9 +274,40 @@ export class GameUI {
             this.victoryModal.remove();
             this.victoryModal = null;
         }
+        if (this.failureModal) {
+            this.failureModal.remove();
+            this.failureModal = null;
+        }
         if (this.levelPage) {
             this.levelPage.remove();
             this.levelPage = null;
+        }
+    }
+
+    /**
+     * 更新技能冷却时间显示
+     * @param {Object} cooldowns 冷却时间对象 {clone: 秒数, dragonTiger: 秒数}
+     */
+    updateSkillCooldowns(cooldowns) {
+        const cloneCooldown = document.getElementById('skill-clone-cooldown');
+        const dragonTigerCooldown = document.getElementById('skill-dragon-tiger-cooldown');
+        const cloneItem = document.getElementById('skill-clone');
+        const dragonTigerItem = document.getElementById('skill-dragon-tiger');
+
+        if (cloneCooldown && cooldowns.clone !== undefined) {
+            const seconds = Math.ceil(cooldowns.clone);
+            cloneCooldown.textContent = seconds > 0 ? seconds : '';
+            if (cloneItem) {
+                cloneItem.classList.toggle('on-cooldown', seconds > 0);
+            }
+        }
+
+        if (dragonTigerCooldown && cooldowns.dragonTiger !== undefined) {
+            const seconds = Math.ceil(cooldowns.dragonTiger);
+            dragonTigerCooldown.textContent = seconds > 0 ? seconds : '';
+            if (dragonTigerItem) {
+                dragonTigerItem.classList.toggle('on-cooldown', seconds > 0);
+            }
         }
     }
 }

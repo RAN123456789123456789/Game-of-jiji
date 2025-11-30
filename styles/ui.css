@@ -41,6 +41,14 @@
     position: relative;
 }
 
+.character-health {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    pointer-events: none;
+}
+
 #scene3d {
     width: 100%;
     height: 100%;
@@ -111,17 +119,106 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 背包样式 */
+/* 背包切换按钮 */
+.inventory-toggle-btn {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+}
+
+.inventory-toggle-btn:hover {
+    background: rgba(118, 75, 162, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.inventory-btn-icon {
+    font-size: 1.3em;
+}
+
+.inventory-btn-text {
+    font-weight: bold;
+}
+
+/* 背包样式 - 浮动在场景上方 */
 .inventory {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: none;
+    /* 默认隐藏 */
+}
+
+.inventory.show {
+    display: block;
+}
+
+/* 背包背景遮罩 */
+.inventory-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease;
+}
+
+/* 背包内容 */
+.inventory-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: rgba(255, 255, 255, 0.98);
-    border-radius: 15px;
-    padding: 25px;
-    margin-top: 20px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: inventorySlideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes inventorySlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 .inventory-header {
@@ -131,6 +228,20 @@
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 2px solid #eee;
+}
+
+.inventory-header h3 {
+    color: #333;
+    font-size: 1.5em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.inventory-header h3::before {
+    content: '🎒';
+    font-size: 1.2em;
 }
 
 .inventory-header h3 {
@@ -153,11 +264,12 @@
     align-items: center;
     justify-content: center;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .close-inventory:hover {
     background: #ff5252;
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.1);
 }
 
 .inventory-items {
@@ -441,4 +553,395 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     background: #f0f0f0;
+}
+
+/* 角色血条UI样式 */
+.character-health-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.character-avatar {
+    font-size: 2.5em;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.character-health-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 200px;
+}
+
+.character-health-bar-bg {
+    width: 100%;
+    height: 25px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+.character-health-bar-fill {
+    height: 100%;
+    background: #00ff00;
+    transition: width 0.3s ease, background 0.3s ease;
+    border-radius: 10px;
+}
+
+.character-health-text {
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+/* 角色界面切换按钮 */
+.character-panel-toggle-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 120px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.character-panel-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.05);
+}
+
+/* 角色界面样式 */
+.character-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 30, 40, 0.95);
+    border: 3px solid #8b4c9f;
+    border-radius: 15px;
+    padding: 30px;
+    min-width: 500px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+.character-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #8b4c9f;
+    padding-bottom: 10px;
+}
+
+.character-panel-header h2 {
+    margin: 0;
+    color: #ffb6c1;
+    font-size: 24px;
+}
+
+.character-panel-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    transition: all 0.3s;
+}
+
+.character-panel-close:hover {
+    color: #ff0000;
+    transform: rotate(90deg);
+}
+
+.character-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.character-stats {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item.stat-power {
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 2px solid #ffd700;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: #ffb6c1;
+    font-size: 16px;
+}
+
+.stat-value {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.stat-item.stat-power .stat-value {
+    color: #ffd700;
+    font-size: 20px;
+}
+
+.character-equipment h3 {
+    margin: 0 0 15px 0;
+    color: #ffb6c1;
+    font-size: 20px;
+}
+
+.equipment-slots {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.equipment-slot {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #8b4c9f;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 120px;
+}
+
+.equipment-slot:hover {
+    border-color: #ffb6c1;
+    background: rgba(139, 76, 159, 0.2);
+    transform: scale(1.05);
+}
+
+.slot-label {
+    color: #ffb6c1;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.slot-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.slot-empty {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.equipment-item {
+    text-align: center;
+    width: 100%;
+}
+
+.equipment-icon {
+    font-size: 48px;
+    margin-bottom: 5px;
+}
+
+.equipment-name {
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.equipment-stats {
+    font-size: 12px;
+    color: #ffb6c1;
+    margin-top: 5px;
+}
+
+.equipment-stats div {
+    margin: 2px 0;
+}
+
+/* 失败界面样式 */
+.failure-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.failure-content {
+    background: linear-gradient(135deg, #8b0000 0%, #4b0000 100%);
+    padding: 50px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
+    animation: slideIn 0.5s ease;
+}
+
+.failure-content h1 {
+    font-size: 3em;
+    margin: 0 0 20px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.failure-message {
+    font-size: 1.3em;
+    margin: 20px 0 30px 0;
+    color: #ffcccc;
+}
+
+.failure-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.failure-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.failure-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 技能栏样式 */
+.skills-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.skill-item {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.skill-item:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.skill-item.on-cooldown {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.skill-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.skill-cooldown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
 }

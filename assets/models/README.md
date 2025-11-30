@@ -75,3 +75,4 @@ game.modelManager.initialize({
 - 确保模型文件大小合理，避免影响加载性能
 - 建议使用GLTF格式，因为它是最优化的Web 3D格式
 
+

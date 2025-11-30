@@ -47,7 +47,9 @@ export class ModelManager {
     async getModel(id) {
         // 检查缓存
         if (this.cache.has(id)) {
-            return this.cache.get(id).clone();
+            const cachedModel = this.cache.get(id);
+            // THREE.Object3D 应该有 clone 方法
+            return cachedModel.clone();
         }
 
         // 检查注册表
@@ -59,9 +61,18 @@ export class ModelManager {
         // 加载模型
         try {
             const model = await this.loader.loadModel(modelInfo.path, modelInfo.type);
+
+            // 确保模型是 THREE.Object3D 类型
+            if (!model || !model.isObject3D) {
+                throw new Error(`加载的模型 ${id} 不是有效的 THREE.Object3D 对象`);
+            }
+
+            // 缓存模型
             this.cache.set(id, model);
             modelInfo.loaded = true;
             modelInfo.object = model;
+
+            // 克隆模型（THREE.Object3D 有 clone 方法）
             return model.clone();
         } catch (error) {
             console.error(`加载模型 ${id} 失败:`, error);
@@ -115,4 +126,5 @@ export class ModelManager {
         return Array.from(this.modelRegistry.values());
     }
 }
+
 

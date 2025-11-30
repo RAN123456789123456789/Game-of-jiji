@@ -35,12 +35,17 @@ export class ModelLoader {
 
             loader.load(
                 path,
-                (object) => {
-                    resolve(object);
+                (gltf) => {
+                    // GLTFLoader 返回的是 GLTF 对象，需要提取 scene 属性
+                    // 如果是 GLTF 对象，提取 scene；否则直接使用
+                    const model = gltf.scene || gltf;
+                    resolve(model);
                 },
                 (progress) => {
                     // 可以在这里添加加载进度回调
-                    console.log(`加载进度: ${(progress.loaded / progress.total * 100)}%`);
+                    if (progress.total > 0) {
+                        console.log(`加载进度: ${(progress.loaded / progress.total * 100).toFixed(2)}%`);
+                    }
                 },
                 (error) => {
                     reject(error);
@@ -61,4 +66,5 @@ export class ModelLoader {
         return Promise.all(promises);
     }
 }
+
 
